@@ -56,3 +56,21 @@ h1, .romance-title {
     animation: flip-sequence 0.5s ease-in-out forwards;
 }
 
+@keyframes border-ring {
+    0% {
+        box-shadow: 0 0 0 0 rgba(244, 114, 182, 0.7); /* rose-400 */
+        border-color: rgba(244, 114, 182, 0.8);
+    }
+    50% {
+        box-shadow: 0 0 12px 6px rgba(244, 114, 182, 0.9);
+        border-color: rgba(244, 114, 182, 1);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(244, 114, 182, 0);
+        border-color: transparent;
+    }
+}
+
+.animate-border-ring {
+    animation: border-ring 1.2s ease-out forwards;
+}

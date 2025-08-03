@@ -7,7 +7,7 @@ const ImageCard = ({ data, setSelectedCards, selectedCards, gameStarted }) => {
     const [isFlipped, setIsFlipped] = useState(false);
     const [isFlipping, setIsFlipping] = useState(false);
     const [disableClick, setDisableClick] = useState(false);
-
+    const [match, setMatch] = useState(false);
 
     const handleClick = () => {
         if (!gameStarted){
@@ -45,6 +45,7 @@ const ImageCard = ({ data, setSelectedCards, selectedCards, gameStarted }) => {
 
                 if (selectedCards[0] === selectedCards[1] && (selectedCards.includes(charData.couple_id))) {
                     setDisableClick(true); // Kunci Pasangan
+                    setMatch(true);
                 }else{
                     if (isFlipped || isFlipping){
                         setIsFlipping(true);
@@ -70,7 +71,6 @@ const ImageCard = ({ data, setSelectedCards, selectedCards, gameStarted }) => {
             onClick={handleClick}
         >
         <div className={`relative w-full h-full ${isFlipping ? "flip-sequence" : ""}`}>
-                {/* Back (initial view) */}
                 {!isFlipped && (
                     <div className="absolute w-full h-full backface-hidden overflow-hidden rounded-xl shadow-xl border-2 border-black bg-white">
                         <img
@@ -81,9 +81,12 @@ const ImageCard = ({ data, setSelectedCards, selectedCards, gameStarted }) => {
                     </div>
                 )}
 
-                {/* Front (after flipped) */}
                 {isFlipped && (
-                    <div className="absolute w-full h-full backface-hidden overflow-hidden rounded-xl shadow-xl border-0 border-black bg-white">
+                    <div
+                        className={`absolute w-full h-full backface-hidden overflow-hidden rounded-xl shadow-xl border-2 ${
+                            match ? "animate-border-ring border-rose-400" : "border-0"
+                        } bg-white`}
+                    >
                         <img
                             src={charData.image}
                             alt='character'

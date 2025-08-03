@@ -2,20 +2,23 @@ import {useState, useMemo, useEffect, useRef} from "react";
 import ImageCard from "./components/ImageCard.jsx";
 
 function App() {
-    const locationAssets = 'http://' + location.host + '/assets/';
-
+    const locationAssets = window.location.protocol + '//' + window.location.host + '/assets/';
     const [selectedCards, setSelectedCards] = useState([]);
     const [couplePoints, setCouplePoints] = useState(0);
     const [timer, setTimer] = useState(120);
     const timerRef = useRef(null);
     const audioRef = useRef(null);
     const [gameStarted, setGameStarted] = useState(false);
-
     const [finalScore, setFinalScore] = useState(0);
+    const [showPopup, setShowPopup] = useState(false);
+
 
     useEffect(() => {
         if (gameStarted){
             timerRef.current = setInterval(() => {
+                if (timer <= 0) {
+                    setGameStarted(false);
+                }
                 setTimer(prev => prev - 1);
             }, 1000);
         }
@@ -26,21 +29,44 @@ function App() {
     const COUPLE_LIMIT = 12;
 
     useEffect(() => {
+        if (timer <= 0 && gameStarted) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+
+            const maxTime = 120;
+            const timeScore = (timer / maxTime) * 100;
+            const coupleScore = (couplePoints / COUPLE_LIMIT) * 100;
+            const final = Math.round((timeScore * 0.5) + (coupleScore * 0.5));
+
+            setFinalScore(final);
+            setGameStarted(false);
+            setShowPopup(true);
+        }
+    }, [timer]);
+
+    useEffect(() => {
         if (couplePoints === COUPLE_LIMIT && timerRef.current) {
             clearInterval(timerRef.current);
             timerRef.current = null;
-            console.log("Timer dihentikan karena poin mencapai 4!");
 
             const maxTime = 120;
-            const score = Math.max(0, Math.round((timer / maxTime) * 100));
-            setFinalScore(score);
+            const timeScore = (timer / maxTime) * 100;
+            const coupleScore = (couplePoints / COUPLE_LIMIT) * 100;
+            const final = Math.round((timeScore * 0.5) + (coupleScore * 0.5));
+
+            setFinalScore(final);
             setGameStarted(false);
+            setShowPopup(true);
         }
     }, [couplePoints]);
 
+
+
     const songs = [
         'wave to earth - love.mp3',
-        'The Walters - I Love You So.mp3'
+        'The Walters - I Love You So.mp3',
+        'beabadoobee - Glue Song.mp3',
+        'Laufey - Valentine.mp3',
     ]
 
     const selectedSong = useMemo(() => {
@@ -82,24 +108,19 @@ function App() {
     ];
 
     const shuffled = useMemo(() => {
-        // 1. Ambil pasangan unik
         const coupleIds = [...new Set(characters.map(c => c.couple_id))];
 
-        // 2. Shuffle pasangan
         for (let i = coupleIds.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [coupleIds[i], coupleIds[j]] = [coupleIds[j], coupleIds[i]];
         }
 
-        // 3. Ambil 12 pasangan acak
         const selectedCoupleIds = coupleIds.slice(0, COUPLE_LIMIT);
 
-        // 4. Ambil semua karakter dari pasangan terpilih
         const selectedCharacters = characters.filter(c =>
             selectedCoupleIds.includes(c.couple_id)
         );
 
-        // 5. Fisher-Yates Shuffle karakter
         for (let i = selectedCharacters.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [selectedCharacters[i], selectedCharacters[j]] = [
@@ -124,7 +145,7 @@ function App() {
     const handleStart =() => {
         // Mulai musik
         if (audioRef.current) {
-            audioRef.current.volume = 0.5; // (opsional) set volume
+            audioRef.current.volume = 1; // (opsional) set volume
             audioRef.current.play().catch(e => {
                 console.warn("Autoplay diblokir browser:", e);
             });
@@ -133,7 +154,7 @@ function App() {
     }
 
     return (
-        <div className="w-full min-h-screen flex flex-col md:flex-row p-4 gap-4 bg-rose-200">
+        <div className="w-full min-h-screen flex flex-col md:flex-row p-4 gap-4 bg-rose-50">
             <div className="w-full md:w-1/4 bg-rose-100 rounded-2xl shadow-lg p-6 flex flex-col gap-6">
                 <h1 className="text-3xl font-extrabold text-center text-rose-800">My Kisah 💖</h1>
                 <button
@@ -177,8 +198,25 @@ function App() {
                 ))}
             </div>
 
-        </div>
 
+            {showPopup && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center animate-fadeIn">
+                        <h2 className="text-3xl font-bold text-rose-600 mb-4">🎉 Permainan Selesai!</h2>
+                        <p className="text-lg text-gray-700">Couples Found: <span className="font-bold text-rose-500">{couplePoints}/{COUPLE_LIMIT}</span></p>
+                        <p className="text-lg text-gray-700 mb-4">Waktu Tersisa: <span className="font-bold">{Math.max(timer, 0)} detik</span></p>
+                        <p className="text-2xl font-semibold text-rose-800 mb-6">Skor Akhir: <span className="font-extrabold">{finalScore}</span></p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="mt-2 px-6 py-2 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-semibold transition"
+                        >
+                            Main Lagi 💞
+                        </button>
+                    </div>
+                </div>
+            )}
+
+        </div>
     );
 }
 
