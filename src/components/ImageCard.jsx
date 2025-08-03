@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import PropTypes from "prop-types";
 
-const ImageCard = ({ data, setSelectedCards, selectedCards, gameStarted }) => {
+const ImageCard = ({ data, setSelectedCards, selectedCards, gameStarted, resetCard }) => {
     const [charData] = useState(data);
 
     const [isFlipped, setIsFlipped] = useState(false);
@@ -9,16 +9,25 @@ const ImageCard = ({ data, setSelectedCards, selectedCards, gameStarted }) => {
     const [disableClick, setDisableClick] = useState(false);
     const [match, setMatch] = useState(false);
 
+    useEffect(() => {
+        if (resetCard){
+            setMatch(false);
+        }
+    }, [resetCard]);
+
     const handleClick = () => {
         if (!gameStarted){
+            console.warn("Game Belum Dimulai");
             return;
         }
 
-        if (disableClick){
+        if (disableClick && gameStarted && resetCard){
+            console.warn("Disable Click");
             return;
         }
 
         if (selectedCards.length === 2) {
+            console.warn("Sudah Memilih 2 Pasangan");
             return;
         }
 
@@ -37,32 +46,45 @@ const ImageCard = ({ data, setSelectedCards, selectedCards, gameStarted }) => {
     };
 
     useEffect(() => {
-        setTimeout(() => {
-            if (selectedCards.length === 2){
-                if (!selectedCards.includes(charData.couple_id)){
-                    return;
-                }
+        if (resetCard){
+            if (isFlipped || isFlipping){
+                setIsFlipping(true);
+                setTimeout(() => {
+                    setIsFlipped(false);
+                }, 200);
 
-                if (selectedCards[0] === selectedCards[1] && (selectedCards.includes(charData.couple_id))) {
-                    setDisableClick(true); // Kunci Pasangan
-                    setMatch(true);
-                }else{
-                    if (isFlipped || isFlipping){
-                        setIsFlipping(true);
-                        setTimeout(() => {
-                            setIsFlipped(false);
-                        }, 200);
-
-                        setTimeout(() => {
-                            setIsFlipping(false);
-                        }, 300);
-                    }
-                }
-
-                setSelectedCards([]);
+                setTimeout(() => {
+                    setIsFlipping(false);
+                }, 300);
             }
-        }, 310);
-    }, [selectedCards.length]);
+        }else{
+            setTimeout(() => {
+                if (selectedCards.length === 2){
+                    if (!selectedCards.includes(charData.couple_id)){
+                        return;
+                    }
+
+                    if (selectedCards[0] === selectedCards[1] && (selectedCards.includes(charData.couple_id))) {
+                        setDisableClick(true); // Kunci Pasangan
+                        setMatch(true);
+                    }else{
+                        if (isFlipped || isFlipping){
+                            setIsFlipping(true);
+                            setTimeout(() => {
+                                setIsFlipped(false);
+                            }, 200);
+
+                            setTimeout(() => {
+                                setIsFlipping(false);
+                            }, 300);
+                        }
+                    }
+
+                    setSelectedCards([]);
+                }
+            }, 310);
+        }
+    }, [selectedCards.length, resetCard]);
 
 
     return (
@@ -103,7 +125,8 @@ ImageCard.propTypes = {
     data: PropTypes.object.isRequired,
     setSelectedCards: PropTypes.func.isRequired,
     selectedCards: PropTypes.array,
-    gameStarted: PropTypes.bool
+    gameStarted: PropTypes.bool,
+    resetCard: PropTypes.bool
 };
 
 export default ImageCard;

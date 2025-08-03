@@ -2,15 +2,21 @@ import {useState, useMemo, useEffect, useRef} from "react";
 import ImageCard from "./components/ImageCard.jsx";
 
 function App() {
+    const COUPLE_LIMIT = 12;
+    const MAX_TIMES = 10;
     const locationAssets = window.location.protocol + '//' + window.location.host + '/assets/';
+    const [shuffled, setShuffled] = useState([]);
     const [selectedCards, setSelectedCards] = useState([]);
     const [couplePoints, setCouplePoints] = useState(0);
-    const [timer, setTimer] = useState(120);
+    const [moves, setMoves] = useState(0);
+    const [timer, setTimer] = useState(MAX_TIMES);
     const timerRef = useRef(null);
     const audioRef = useRef(null);
     const [gameStarted, setGameStarted] = useState(false);
+    const [gameEnded, setGameEnded] = useState(false);
     const [finalScore, setFinalScore] = useState(0);
     const [showPopup, setShowPopup] = useState(false);
+    const [resetCard, setResetCard] = useState(false);
 
 
     useEffect(() => {
@@ -26,21 +32,23 @@ function App() {
         return () => clearInterval(timerRef.current);
     }, [gameStarted]);
 
-    const COUPLE_LIMIT = 12;
-
     useEffect(() => {
         if (timer <= 0 && gameStarted) {
             clearInterval(timerRef.current);
             timerRef.current = null;
 
-            const maxTime = 120;
-            const timeScore = (timer / maxTime) * 100;
+            const timeScore = (timer / MAX_TIMES) * 100;
             const coupleScore = (couplePoints / COUPLE_LIMIT) * 100;
-            const final = Math.round((timeScore * 0.5) + (coupleScore * 0.5));
+            const maxPenalty = 50;
+            const penaltyScore = Math.min(moves * 1, maxPenalty);
 
-            setFinalScore(final);
+            const rawScore = (timeScore * 0.4) + (coupleScore * 0.5) - penaltyScore;
+            const finalScore = Math.max(0, Math.round(rawScore));
+
+            setFinalScore(finalScore);
             setGameStarted(false);
             setShowPopup(true);
+            setGameEnded(true);
         }
     }, [timer]);
 
@@ -49,14 +57,18 @@ function App() {
             clearInterval(timerRef.current);
             timerRef.current = null;
 
-            const maxTime = 120;
-            const timeScore = (timer / maxTime) * 100;
+            const timeScore = (timer / MAX_TIMES) * 100;
             const coupleScore = (couplePoints / COUPLE_LIMIT) * 100;
-            const final = Math.round((timeScore * 0.5) + (coupleScore * 0.5));
+            const maxPenalty = 50;
+            const penaltyScore = Math.min(moves * 1, maxPenalty);
 
-            setFinalScore(final);
+            const rawScore = (timeScore * 0.4) + (coupleScore * 0.5) - penaltyScore;
+            const finalScore = Math.max(0, Math.round(rawScore));
+
+            setFinalScore(finalScore);
             setGameStarted(false);
             setShowPopup(true);
+            setGameEnded(true);
         }
     }, [couplePoints]);
 
@@ -69,10 +81,10 @@ function App() {
         'Laufey - Valentine.mp3',
     ]
 
-    const selectedSong = useMemo(() => {
+    const [selectedSong, setSelectedSong] = useState(() => {
         const index = Math.floor(Math.random() * songs.length);
         return songs[index];
-    }, []);
+    });
 
     const characters = [
         { name: 'Arima Kousei', image: locationAssets + 'Arima Kousei.jpg', couple_id: 0 },
@@ -105,32 +117,63 @@ function App() {
         { name: 'Waguri', image: locationAssets + 'Waguri.jpg', couple_id: 13 },
         { name: 'Ken', image: locationAssets + 'Ken.jpg', couple_id: 14 },
         { name: 'Ayase', image: locationAssets + 'Ayase.jpg', couple_id: 14 },
+        { name: 'Jirou', image: locationAssets + 'Jirou.jpg', couple_id: 15 },
+        { name: 'Naoko', image: locationAssets + 'Naoko.jpg', couple_id: 15},
+        { name: 'Haku', image: locationAssets + 'Haku.jpg', couple_id: 16},
+        { name: 'Chihiro', image: locationAssets + 'Chihiro.jpg', couple_id: 16},
+        { name: 'Age', image: locationAssets + 'Age.jpg', couple_id: 17},
+        { name: 'Patema', image: locationAssets + 'Patema.jpg', couple_id: 17},
+        { name: 'Hiro', image: locationAssets + 'Hiro.jpg', couple_id: 18},
+        { name: 'ZeroTwo', image: locationAssets + 'ZeroTwo.jpg', couple_id: 18},
+        { name: 'Gojo', image: locationAssets + 'Gojo.jpg', couple_id: 19},
+        { name: 'Marin', image: locationAssets + 'Marin.jpg', couple_id: 19},
+        { name: 'Raku', image: locationAssets + 'Raku.jpg', couple_id: 20},
+        { name: 'Onodera', image: locationAssets + 'Onodera.jpg', couple_id: 20},
+        { name: 'Hachiman', image: locationAssets + 'Hachiman.jpg', couple_id: 21},
+        { name: 'Yukino', image: locationAssets + 'Yukino.jpg', couple_id: 21},
+        { name: 'Arata', image: locationAssets + 'Arata.jpg', couple_id: 22},
+        { name: 'Chizuru', image: locationAssets + 'Chizuru.jpg', couple_id: 22},
+        { name: 'Haruki', image: locationAssets + 'Haruki.jpg', couple_id: 23},
+        { name: 'Sakura', image: locationAssets + 'Sakura.jpg', couple_id: 23},
+        { name: 'Shouta', image: locationAssets + 'Shouta.jpg', couple_id: 24},
+        { name: 'Sawako', image: locationAssets + 'Sawako.jpg', couple_id: 24},
+        { name: 'Kou', image: locationAssets + 'Kou.jpg', couple_id: 25},
+        { name: 'Futaba', image: locationAssets + 'Futaba.jpg', couple_id: 25},
+        { name: 'Stark', image: locationAssets + 'Stark.jpg', couple_id: 26},
+        { name: 'Fern', image: locationAssets + 'Fern.jpg', couple_id: 26},
+        { name: 'Himmel', image: locationAssets + 'Himmel.jpg', couple_id: 27},
+        { name: 'Frieren', image: locationAssets + 'Frieren.jpg', couple_id: 27},
     ];
 
-    const shuffled = useMemo(() => {
-        const coupleIds = [...new Set(characters.map(c => c.couple_id))];
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            const coupleIds = [...new Set(characters.map(c => c.couple_id))];
 
-        for (let i = coupleIds.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [coupleIds[i], coupleIds[j]] = [coupleIds[j], coupleIds[i]];
-        }
+            for (let i = coupleIds.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [coupleIds[i], coupleIds[j]] = [coupleIds[j], coupleIds[i]];
+            }
 
-        const selectedCoupleIds = coupleIds.slice(0, COUPLE_LIMIT);
+            const selectedCoupleIds = coupleIds.slice(0, COUPLE_LIMIT);
 
-        const selectedCharacters = characters.filter(c =>
-            selectedCoupleIds.includes(c.couple_id)
-        );
+            const selectedCharacters = characters.filter(c =>
+                selectedCoupleIds.includes(c.couple_id)
+            );
 
-        for (let i = selectedCharacters.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [selectedCharacters[i], selectedCharacters[j]] = [
-                selectedCharacters[j],
-                selectedCharacters[i],
-            ];
-        }
+            for (let i = selectedCharacters.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [selectedCharacters[i], selectedCharacters[j]] = [
+                    selectedCharacters[j],
+                    selectedCharacters[i],
+                ];
+            }
 
-        return selectedCharacters;
-    }, []);
+            setShuffled(selectedCharacters);
+        }, 310);
+
+        return () => clearTimeout(timeout);
+    }, [resetCard]);
+
 
 
 
@@ -139,18 +182,48 @@ function App() {
 
         if (selectedCards[0] === selectedCards[1]) {
             setCouplePoints(prev => prev + 1);
+        } else {
+            setMoves(prev => prev + 1);
         }
     }, [selectedCards]);
 
-    const handleStart =() => {
-        // Mulai musik
-        if (audioRef.current) {
-            audioRef.current.volume = 1; // (opsional) set volume
-            audioRef.current.play().catch(e => {
-                console.warn("Autoplay diblokir browser:", e);
-            });
+    useEffect(() => {
+        if (resetCard){
+            setResetCard(false)
         }
+    }, [resetCard]);
+
+    const handleStart =() => {
+        if (gameEnded){
+            setResetCard(true);
+        }
+
+        if (gameStarted && !gameEnded) {
+            return;
+        }
+
+        // Mulai musik
+        setSelectedSong(() => {
+            const index = Math.floor(Math.random() * songs.length);
+            return songs[index];
+        });
+
+        setTimeout(() => {
+            if (audioRef.current) {
+                audioRef.current.currentTime = 0; // reset ke awal
+                audioRef.current.volume = 1; // (opsional) set volume
+                audioRef.current.play().catch(e => {
+                    console.warn("Autoplay diblokir browser:", e);
+                });
+            }
+        }, 100);
+
+        setSelectedCards([]);
+        setCouplePoints(0);
+        setTimer(MAX_TIMES);
+        setFinalScore(0);
         setGameStarted(true);
+        setGameEnded(false);
     }
 
     return (
@@ -166,9 +239,11 @@ function App() {
                             : 'bg-rose-500 hover:bg-rose-600'
                     }`}
                 >
-                    {gameStarted ? 'Game Dimulai' : 'Start Game'}
+                    {gameStarted ? 'Game Dimulai' : gameEnded ? 'Main Lagi' : 'Start Game'}
                 </button>
+
                 <div className="text-lg font-medium text-rose-800 space-y-2">
+                    <p>Wrong Moves: <span className="font-bold">{moves}</span></p>
                     <p>⏱️ Timer: <span className="font-bold">{timer}</span> detik</p>
                     <p>⭐ Score (Couples): <span className="font-bold">{couplePoints}</span></p>
                     <p>🏁 Final Score: <span className="font-bold">{finalScore}</span></p>
@@ -178,7 +253,12 @@ function App() {
                 {/* MP3 Player */}
                 <div className="mt-auto">
                     <p className="text-rose-600 font-semibold mb-1">🎵 Theme Song</p>
-                    <audio ref={audioRef} controls className="w-full">
+                    <audio
+                        key={selectedSong} // ⬅ ini penting!
+                        ref={audioRef}
+                        controls
+                        className="w-full"
+                    >
                         <source src={`/audio/${selectedSong}`} type="audio/mpeg" />
                         Browser kamu tidak mendukung audio player.
                     </audio>
@@ -194,6 +274,7 @@ function App() {
                         setSelectedCards={setSelectedCards}
                         selectedCards={selectedCards}
                         gameStarted={gameStarted}
+                        resetCard={resetCard}
                     />
                 ))}
             </div>
@@ -201,13 +282,24 @@ function App() {
 
             {showPopup && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center animate-fadeIn">
+                    <div className="relative bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center animate-fadeIn">
+                        <button
+                            onClick={() => setShowPopup(false)}
+                            className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold"
+                            aria-label="Tutup"
+                        >
+                            ×
+                        </button>
                         <h2 className="text-3xl font-bold text-rose-600 mb-4">🎉 Permainan Selesai!</h2>
+                        <p className="text-lg text-gray-700">Wrong Moves: <span className="font-bold text-rose-500">{moves}</span></p>
                         <p className="text-lg text-gray-700">Couples Found: <span className="font-bold text-rose-500">{couplePoints}/{COUPLE_LIMIT}</span></p>
-                        <p className="text-lg text-gray-700 mb-4">Waktu Tersisa: <span className="font-bold">{Math.max(timer, 0)} detik</span></p>
+                        <p className="text-lg text-gray-700 mb-4">Waktu Tersisa: <span className="font-bold">{Math.max(timer, 0)} detik/2 Menit</span></p>
                         <p className="text-2xl font-semibold text-rose-800 mb-6">Skor Akhir: <span className="font-extrabold">{finalScore}</span></p>
                         <button
-                            onClick={() => window.location.reload()}
+                            onClick={() => {
+                                setShowPopup(false);
+                                handleStart();
+                            }}
                             className="mt-2 px-6 py-2 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-semibold transition"
                         >
                             Main Lagi 💞
@@ -215,7 +307,6 @@ function App() {
                     </div>
                 </div>
             )}
-
         </div>
     );
 }
