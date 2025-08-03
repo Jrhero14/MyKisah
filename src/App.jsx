@@ -169,12 +169,22 @@ function App() {
             }
 
             setShuffled(selectedCharacters);
+
+            // ✅ Preload image karakter
+            selectedCharacters.forEach(char => {
+                const img = new Image();
+                img.src = char.image;
+            });
+
         }, 310);
 
         return () => clearTimeout(timeout);
     }, [resetCard]);
 
-
+    useEffect(() => {
+        const img = new Image();
+        img.src = locationAssets + 'back_card.png';
+    }, []);
 
 
     useEffect(() => {
