@@ -1,9 +1,9 @@
-import {useState, useMemo, useEffect, useRef} from "react";
+import {useState, useEffect, useRef} from "react";
 import ImageCard from "./components/ImageCard.jsx";
 
 function App() {
     const COUPLE_LIMIT = 12;
-    const MAX_TIMES = 10;
+    const MAX_TIMES = 120;
     const locationAssets = window.location.protocol + '//' + window.location.host + '/assets/';
     const [shuffled, setShuffled] = useState([]);
     const [selectedCards, setSelectedCards] = useState([]);
